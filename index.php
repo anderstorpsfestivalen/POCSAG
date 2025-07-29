@@ -200,7 +200,7 @@ if (isset($_POST["button2"])) {
 <body>
 <center>
 <form method="post" action="">
-    <select name="dropdown" id="dropdown" onchange="toggleFreetextInputs()">
+    <select name="dropdown" id="dropdown" onchange="toggleFreetextInputs()" style="font-size:24px">
         <option value="selection1">Pager1 0364594</option>
         <option value="selection2">Pager2 0364592</option>
         <option value="selection3">Pager3 1277794</option>
