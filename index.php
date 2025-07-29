@@ -45,6 +45,7 @@ $enableSubnetRestriction = true; // Set to false to disable subnet restrictions
 $whitelistedSubnets = [
     "127.0.0.0/24",
     "10.0.0.0/8",
+    "192.168.1.0/24",
 ];
 
 // Sample items data
@@ -72,11 +73,11 @@ if (isset($_POST['button1'])) {
     foreach ($items as $item) {
         if ($item['inversion'] == 'on') {
             $command = 'sudo echo -e "' . $item['capcode'] . ':' . $replaced_input .
-                '" | sudo ./pocsagstuff/pocsag -f "' . $item['freq'] .
+                '" | sudo ./pocsag -f "' . $item['freq'] .
                 '" -b 3 -r "' . $item['baud'] . '" -t 3 -i';
         } else {
             $command = 'sudo echo -e "' . $item['capcode'] . ':' . $replaced_input .
-                '" | sudo ./pocsagstuff/pocsag -f "' . $item['freq'] .
+                '" | sudo ./pocsag -f "' . $item['freq'] .
                 '" -b 3 -r "' . $item['baud'] . '" -t 3';
         }
 
@@ -90,6 +91,7 @@ if (isset($_POST['button1'])) {
                 'inversion' => $item['inversion']
             ]);
             $commandLogCounter++;
+     // echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
         }
     }
 }
@@ -154,8 +156,8 @@ if (isset($_POST["button2"])) {
 
     // Build command
     $command = ($var4 === 'on') ?
-        'sudo echo -e "' . $var1 . ':' . $replaced_input . '" | sudo ./pocsagstuff/pocsag -f "' . $var2 . '" -b 3 -r "' . $var3 . '" -t 3 -i' :
-        'sudo echo -e "' . $var1 . ':' . $replaced_input . '" | sudo ./pocsagstuff/pocsag -f "' . $var2 . '" -b 3 -r "' . $var3 . '" -t 3';
+        'sudo echo -e "' . $var1 . ':' . $replaced_input . '" | sudo ./pocsag -f "' . $var2 . '" -b 3 -r "' . $var3 . '" -t 3 -i' :
+        'sudo echo -e "' . $var1 . ':' . $replaced_input . '" | sudo ./pocsag -f "' . $var2 . '" -b 3 -r "' . $var3 . '" -t 3';
 
     $output = shell_exec($command);
     if ($output !== null) {
@@ -167,6 +169,7 @@ if (isset($_POST["button2"])) {
             'inversion' => $var4
         ]);
         $commandLogCounter++;
+        echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
     }
 
     // Prepare display info
@@ -186,6 +189,13 @@ if (isset($_POST["button2"])) {
 <html>
 <head>
     <title>SUPER DUPER POCSAG SERVICE</title>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 </head>
 <body>
 <center>
