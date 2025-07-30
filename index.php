@@ -1,4 +1,26 @@
 <?php
+if (isset($_POST['print_receipt'])) {
+    $printerDevice = '/dev/usb/lp0';
+
+    // Check if the device is writable
+    if (is_writable($printerDevice)) {
+//        echo "Device is writable. Proceeding with printing.\n";
+
+        // Number of empty lines to add
+        $emptyLinesCount = 8; // Changed from 50 to 8
+        $emptyLines = str_repeat("\n", $emptyLinesCount);
+
+        // Append empty lines to the file
+        file_put_contents('/var/www/dashboard/ascii', $emptyLines, FILE_APPEND);
+
+        // Run the print command
+        $printCommand = "sudo sh -c 'cat /var/www/dashboard/ascii > " . escapeshellarg($printerDevice) . "'";
+        shell_exec($printCommand);
+    } else {
+        echo "printer not available
+";
+    }
+}
 // Function to log commands into a JSON file with incremental IDs
 function logCommand($commandLogCounter, $commandOutput, $details) {
     $logFile = 'command_execution_log.json';
@@ -58,12 +80,10 @@ function getLastLogEntry() {
 function runLogToUsb() {
     $devicePath = '/dev/usb/lp0';
 
-    // Check if the device exists
-    if (!file_exists($devicePath)) {
-        // Device does not exist; skip this step
-        return false;
-    }
-
+if (!is_writable($devicePath)) {
+    // Device not writable, skip
+    return false;
+}
     $entry = getLastLogEntry();
     if ($entry === null) {
         return false; // nothing to send
@@ -85,28 +105,44 @@ function runLogToUsb() {
     // Encode with pretty print
     $jsonData = json_encode($formattedData, JSON_PRETTY_PRINT);
 
-    // Write JSON content to a temporary file
-    $tmpFile = sys_get_temp_dir() . "/log.json";
-    file_put_contents($tmpFile, $jsonData);
+    // Prepare 5 empty lines
+    $emptyLines = str_repeat("\n", 8);
+
+    // Combine JSON data and empty lines (empty lines after)
+    $messageToPrint = $jsonData . $emptyLines;
+
+    // Write the message to a temporary file
+    $tmpPrintFile = sys_get_temp_dir() . "/print.json";
+    file_put_contents($tmpPrintFile, $messageToPrint);
 
     // Send the JSON content to the USB device
-    $command = "sudo sh -c 'cat " . escapeshellarg($tmpFile) . " > " . escapeshellarg($devicePath) . "'";
+    $command = "sudo sh -c 'cat " . escapeshellarg($tmpPrintFile) . " > " . escapeshellarg($devicePath) . "'";
     shell_exec($command);
 
     return true;
 }
 
 
+
+
 // --- Configuration: IP Subnet Restriction ---
-$enableSubnetRestriction = true; // Set to false to disable subnet restrictions
+// Load config
+$configPath = 'config.json';
+$subnetsPath = 'subnets.json';
 
-// List of allowed subnets
-$whitelistedSubnets = [
-    "127.0.0.0/24",
-    "10.0.0.0/8",
-    "192.168.1.0/24",
-];
+$enableSubnetRestriction = true; // default
+$whitelistedSubnets = [];
 
+if (file_exists($configPath)) {
+    $configData = json_decode(file_get_contents($configPath), true);
+    if (isset($configData['enableSubnetRestriction'])) {
+        $enableSubnetRestriction = $configData['enableSubnetRestriction'];
+    }
+}
+
+if (file_exists($subnetsPath)) {
+    $whitelistedSubnets = json_decode(file_get_contents($subnetsPath), true);
+}
 // Sample items data
 $items = [
     ['id' => 1, 'capcode' => '0364594', 'freq' => '147650000', 'baud' => '512', 'inversion' => 'off'],
@@ -150,7 +186,7 @@ if (isset($_POST['button1'])) {
                 'inversion' => $item['inversion']
             ]);
             $commandLogCounter++;
-      echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
+      //echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
         runLogToUsb();
         }
     }
@@ -229,7 +265,7 @@ if (isset($_POST["button2"])) {
             'inversion' => $var4
         ]);
         $commandLogCounter++;
-        echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
+        //echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
         runLogToUsb();
     }
 
@@ -260,7 +296,7 @@ if (isset($_POST["button2"])) {
 </head>
 <body>
 <center>
-<form method="post" action="">
+<form method="post" action="" onsubmit="showLoading()">
     <select name="dropdown" id="dropdown" onchange="toggleFreetextInputs()" style="font-size:24px">
         <option value="selection1">Pager1 0364594</option>
         <option value="selection2">Pager2 0364592</option>
@@ -294,6 +330,11 @@ if (isset($_POST["button2"])) {
     <br>
     <br>
     <input type="submit" value="Send to subscription list" style="height:75px; width:400px; font-size:24px" name="button1">
+    <br>
+    <br>
+    <br>
+    <br>
+<input type="submit" value="Print Beer Purchase Receipt" style="height:75px; width:400px; font-size:24px" name="print_receipt">
 </form>
 
 <?php
@@ -312,3 +353,23 @@ function toggleFreetextInputs() {
 </center>
 </body>
 </html>
+<!-- Loading spinner -->
+<div id="loading" style="
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    padding: 20px;
+    background-color: rgba(0,0,0,0.8);
+    color: #fff;
+    font-size: 24px;
+    border-radius: 10px;
+    z-index: 9999;">
+    Processing...
+</div>
+<script>
+function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+}
+</script>
