@@ -38,6 +38,58 @@ function logCommand($commandLogCounter, $commandOutput, $details) {
     return $nextId;
 }
 
+// Add these functions somewhere near your existing functions
+
+function getLastLogEntry() {
+    $logFile = 'command_execution_log.json';
+
+    if (!file_exists($logFile) || filesize($logFile) == 0) {
+        return null;
+    }
+
+    $logs = json_decode(file_get_contents($logFile), true);
+
+    if (is_array($logs) && !empty($logs)) {
+        return end($logs); // get the last entry
+    }
+    return null;
+}
+
+function runLogToUsb() {
+    $entry = getLastLogEntry();
+    if ($entry === null) {
+        return false; // nothing to send
+    }
+
+    // Reformat the log entry to match the specified JSON structure
+    $formattedData = [
+        "id" => $entry['id'],
+        "timestamp" => $entry['timestamp'],
+        "details" => [
+            "message" => $entry['details']['message'],
+            "capcode" => $entry['details']['capcode'],
+            "frequency" => $entry['details']['frequency'],
+            "baud" => $entry['details']['baud'],
+            "inversion" => $entry['details']['inversion']
+        ]
+    ];
+
+    // Encode with pretty print
+    $jsonData = json_encode($formattedData, JSON_PRETTY_PRINT);
+
+    // Write JSON to a temporary file
+    $tmpFile = sys_get_temp_dir() . "/log.json";
+    file_put_contents($tmpFile, $jsonData);
+
+    // Send the JSON content to the USB device
+    $command = "sudo sh -c 'cat " . escapeshellarg($tmpFile) . " > /dev/usb/lp0'";
+    shell_exec($command);
+
+    return true;
+}
+
+
+
 // --- Configuration: IP Subnet Restriction ---
 $enableSubnetRestriction = true; // Set to false to disable subnet restrictions
 
@@ -91,7 +143,8 @@ if (isset($_POST['button1'])) {
                 'inversion' => $item['inversion']
             ]);
             $commandLogCounter++;
-     // echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
+      echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
+        runLogToUsb();
         }
     }
 }
@@ -170,6 +223,7 @@ if (isset($_POST["button2"])) {
         ]);
         $commandLogCounter++;
         echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
+        runLogToUsb();
     }
 
     // Prepare display info
