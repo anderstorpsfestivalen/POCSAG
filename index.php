@@ -56,6 +56,14 @@ function getLastLogEntry() {
 }
 
 function runLogToUsb() {
+    $devicePath = '/dev/usb/lp0';
+
+    // Check if the device exists
+    if (!file_exists($devicePath)) {
+        // Device does not exist; skip this step
+        return false;
+    }
+
     $entry = getLastLogEntry();
     if ($entry === null) {
         return false; // nothing to send
@@ -77,17 +85,16 @@ function runLogToUsb() {
     // Encode with pretty print
     $jsonData = json_encode($formattedData, JSON_PRETTY_PRINT);
 
-    // Write JSON to a temporary file
+    // Write JSON content to a temporary file
     $tmpFile = sys_get_temp_dir() . "/log.json";
     file_put_contents($tmpFile, $jsonData);
 
     // Send the JSON content to the USB device
-    $command = "sudo sh -c 'cat " . escapeshellarg($tmpFile) . " > /dev/usb/lp0'";
+    $command = "sudo sh -c 'cat " . escapeshellarg($tmpFile) . " > " . escapeshellarg($devicePath) . "'";
     shell_exec($command);
 
     return true;
 }
-
 
 
 // --- Configuration: IP Subnet Restriction ---
