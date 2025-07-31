@@ -1,4 +1,29 @@
 <?php
+// Function to log the "Print Beer Receipt" button presses
+function logPrintBeerReceipt() {
+    $logFile = 'print_receipt_log.json';
+
+    // Read existing logs
+    if (file_exists($logFile) && filesize($logFile) > 0) {
+        $logs = json_decode(file_get_contents($logFile), true);
+        if (!is_array($logs)) {
+            $logs = [];
+        }
+    } else {
+        $logs = [];
+    }
+
+    // Create a new log entry
+    $newEntry = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'action' => 'Print Beer Receipt pressed'
+    ];
+
+    // Append and save
+    $logs[] = $newEntry;
+    file_put_contents($logFile, json_encode($logs, JSON_PRETTY_PRINT));
+}
+
 // Function to get the last message sent
 function getLastMessage() {
     $msgFile = 'messages.json';
@@ -24,29 +49,6 @@ function isDuplicateMessage($message, $config) {
     return ($message === $lastMessage);
 }
 
-if (isset($_POST['print_receipt'])) {
-    $filePath = '/var/www/dashboard/ascii';
-
-    // Append empty lines
-    $emptyLinesCount = 8;
-    $emptyLines = str_repeat("\n", $emptyLinesCount);
-    file_put_contents($filePath, $emptyLines, FILE_APPEND);
-
-    // Path to the printer device
-    $printerDevice = '/dev/usb/lp0'; // Adjust if different
-
-    // Read the content to print
-    $data = file_get_contents($filePath);
-
-    // Write directly to the device
-    $result = @file_put_contents($printerDevice, $data);
-
-    if ($result === false) {
-        echo "Failed to write to printer device.";
-    } else {
-        echo "Print job sent successfully.";
-    }
-}
 
 $itemsFilePath = 'items.json';
 
@@ -206,7 +208,6 @@ if (!is_writable($devicePath)) {
 
 
 
-// --- Configuration: IP Subnet Restriction ---
 // Load config
 $configPath = 'config.json';
 
@@ -241,6 +242,49 @@ if (file_exists($configPath)) {
 if (file_exists($subnetsPath)) {
     $whitelistedSubnets = json_decode(file_get_contents($subnetsPath), true);
 }
+
+if (isset($_POST['print_receipt'])) {
+    if (!canPressButton()) {
+        echo "<script>
+            alert('Please wait at least 60 seconds before pressing this button again.');
+            window.location.href = '" . $_SERVER['PHP_SELF'] . "';
+        </script>";
+        exit();
+    }
+
+    // Log the print receipt action into command log
+    // You can log a generic message or details relevant to printing
+    logCommand($commandLogCounter, null, [
+        'message' => 'Print Beer Purchase Receipt',
+        'action' => 'print_receipt'
+    ]);
+    $commandLogCounter++;
+
+    // Proceed with the printing logic
+    $filePath = '/var/www/dashboard/ascii';
+
+    // Append empty lines
+    $emptyLinesCount = 8;
+    $emptyLines = str_repeat("\n", $emptyLinesCount);
+    file_put_contents($filePath, $emptyLines, FILE_APPEND);
+
+    // Path to the printer device
+    $printerDevice = '/dev/usb/lp0'; // Adjust if different
+
+    // Read the content to print
+    $data = file_get_contents($filePath);
+
+    // Write directly to the device
+    $result = @file_put_contents($printerDevice, $data);
+
+    if ($result === false) {
+        echo "Failed to write to printer device.";
+    } else {
+        echo "Print job sent successfully.";
+        logPrintBeerReceipt();
+    }
+}
+
 
 $field1 = $_POST["stext"] ?? '';
 
