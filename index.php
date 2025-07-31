@@ -1,26 +1,77 @@
 <?php
+// Function to get the last message sent
+function getLastMessage() {
+    $msgFile = 'messages.json';
+    if (!file_exists($msgFile) || filesize($msgFile) == 0) {
+        return '';
+    }
+    $data = json_decode(file_get_contents($msgFile), true);
+    return isset($data['last_message']) ? $data['last_message'] : '';
+}
+
+// Function to set the last message sent
+function setLastMessage($message) {
+    $msgFile = 'messages.json';
+    $data = ['last_message' => $message];
+    file_put_contents($msgFile, json_encode($data));
+}
+
+function isDuplicateMessage($message, $config) {
+    if (!$config['enableMessageDuplicateRestriction']) {
+        return false; // restriction disabled
+    }
+    $lastMessage = getLastMessage();
+    return ($message === $lastMessage);
+}
+
 if (isset($_POST['print_receipt'])) {
-    $printerDevice = '/dev/usb/lp0';
+    $filePath = '/var/www/dashboard/ascii';
 
-    // Check if the device is writable
-    if (is_writable($printerDevice)) {
-//        echo "Device is writable. Proceeding with printing.\n";
+    // Append empty lines
+    $emptyLinesCount = 8;
+    $emptyLines = str_repeat("\n", $emptyLinesCount);
+    file_put_contents($filePath, $emptyLines, FILE_APPEND);
 
-        // Number of empty lines to add
-        $emptyLinesCount = 8; // Changed from 50 to 8
-        $emptyLines = str_repeat("\n", $emptyLinesCount);
+    // Path to the printer device
+    $printerDevice = '/dev/usb/lp0'; // Adjust if different
 
-        // Append empty lines to the file
-        file_put_contents('/var/www/dashboard/ascii', $emptyLines, FILE_APPEND);
+    // Read the content to print
+    $data = file_get_contents($filePath);
 
-        // Run the print command
-        $printCommand = "sudo sh -c 'cat /var/www/dashboard/ascii > " . escapeshellarg($printerDevice) . "'";
-        shell_exec($printCommand);
+    // Write directly to the device
+    $result = @file_put_contents($printerDevice, $data);
+
+    if ($result === false) {
+        echo "Failed to write to printer device.";
     } else {
-        echo "printer not available
-";
+        echo "Print job sent successfully.";
     }
 }
+
+$itemsFilePath = 'items.json';
+
+$items = [];
+if (file_exists($itemsFilePath)) {
+    $jsonContent = file_get_contents($itemsFilePath);
+    $data = json_decode($jsonContent, true);
+    if (isset($data['items']) && is_array($data['items'])) {
+        $items = $data['items'];
+    }
+}
+
+// Load dropdown options from JSON file
+$dropdownFile = 'dropdown_options.json';
+$dropdownOptions = [];
+
+if (file_exists($dropdownFile)) {
+    $jsonContent = file_get_contents($dropdownFile);
+    $data = json_decode($jsonContent, true);
+    if (isset($data['selections']) && is_array($data['selections'])) {
+        $dropdownOptions = $data['selections'];
+    }
+}
+
+
 // Function to log commands into a JSON file with incremental IDs
 function logCommand($commandLogCounter, $commandOutput, $details) {
     $logFile = 'command_execution_log.json';
@@ -77,6 +128,36 @@ function getLastLogEntry() {
     return null;
 }
 
+function getLastCommandTimestamp() {
+    $logFile = 'command_execution_log.json';
+
+    if (!file_exists($logFile) || filesize($logFile) == 0) {
+        return null;
+    }
+
+    $logs = json_decode(file_get_contents($logFile), true);
+    if (is_array($logs) && !empty($logs)) {
+        $lastEntry = end($logs);
+        if (isset($lastEntry['timestamp'])) {
+            return strtotime($lastEntry['timestamp']);
+        }
+    }
+    return null;
+}
+
+function canPressButton() {
+    global $enableRateLimit;
+    if (!$enableRateLimit) {
+        return true; // Rate limiting disabled
+    }
+    $lastTimestamp = getLastCommandTimestamp();
+    if ($lastTimestamp === null) {
+        return true; // No previous command, can proceed
+    }
+    $now = time();
+    return (($now - $lastTimestamp) >= 60);
+}
+
 function runLogToUsb() {
     $devicePath = '/dev/usb/lp0';
 
@@ -128,9 +209,26 @@ if (!is_writable($devicePath)) {
 // --- Configuration: IP Subnet Restriction ---
 // Load config
 $configPath = 'config.json';
+
+//$enableRateLimit = true; // default
+if (file_exists($configPath)) {
+    $configData = json_decode(file_get_contents($configPath), true);
+    if (isset($configData['enableRateLimit'])) {
+        $enableRateLimit = $configData['enableRateLimit'];
+    }
+}
+
+if (file_exists($configPath)) {
+    $configData = json_decode(file_get_contents($configPath), true);
+    if (isset($configData['enableMessageDuplicateRestriction'])) {
+        $enableMsgDupRestriction  = $configData['enableMessageDuplicateRestriction'];
+    }
+}
+
+
 $subnetsPath = 'subnets.json';
 
-$enableSubnetRestriction = true; // default
+//$enableSubnetRestriction = true; // default
 $whitelistedSubnets = [];
 
 if (file_exists($configPath)) {
@@ -143,16 +241,6 @@ if (file_exists($configPath)) {
 if (file_exists($subnetsPath)) {
     $whitelistedSubnets = json_decode(file_get_contents($subnetsPath), true);
 }
-// Sample items data
-$items = [
-    ['id' => 1, 'capcode' => '0364594', 'freq' => '147650000', 'baud' => '512', 'inversion' => 'off'],
-    ['id' => 2, 'capcode' => '0364592', 'freq' => '157499990', 'baud' => '512', 'inversion' => 'off'],
-    ['id' => 3, 'capcode' => '1277794', 'freq' => '161437500', 'baud' => '512', 'inversion' => 'off'],
-    ['id' => 4, 'capcode' => '0644743', 'freq' => '148625000', 'baud' => '512', 'inversion' => 'off'],
-    ['id' => 5, 'capcode' => '0625253', 'freq' => '148625000', 'baud' => '512', 'inversion' => 'off'],
-    ['id' => 6, 'capcode' => '0627015', 'freq' => '148625000', 'baud' => '512', 'inversion' => 'off'],
-    ['id' => 7, 'capcode' => '0642575', 'freq' => '148625000', 'baud' => '512', 'inversion' => 'off']
-];
 
 $field1 = $_POST["stext"] ?? '';
 
@@ -165,58 +253,82 @@ $replaced_input = str_ireplace(
 
 // Handle "Send to subscription list" button
 if (isset($_POST['button1'])) {
-    foreach ($items as $item) {
-        if ($item['inversion'] == 'on') {
-            $command = 'sudo echo -e "' . $item['capcode'] . ':' . $replaced_input .
-                '" | sudo ./pocsag -f "' . $item['freq'] .
-                '" -b 3 -r "' . $item['baud'] . '" -t 3 -i';
-        } else {
-            $command = 'sudo echo -e "' . $item['capcode'] . ':' . $replaced_input .
-                '" | sudo ./pocsag -f "' . $item['freq'] .
-                '" -b 3 -r "' . $item['baud'] . '" -t 3';
-        }
+    if (!canPressButton()) {
+        echo "<script>
+            alert('Please wait at least 60 seconds before pressing this button again.');
+            window.location.href = '" . $_SERVER['PHP_SELF'] . "';
+        </script>";
+        exit();
+    }
+$messageToSend = $field1; // or assemble message parts as needed
 
+    if (isDuplicateMessage($messageToSend, ['enableMessageDuplicateRestriction' => $enableMsgDupRestriction])) {
+        echo "<script>
+            alert('Duplicate message detected. Please change the message or wait before sending the same message again.');
+            window.location.href = '" . $_SERVER['PHP_SELF'] . "';
+        </script>";
+        exit();
+    }
+
+
+    foreach ($items as $item) {
+if ($item['inversion'] == 'on') {
+    $command = 'sudo echo -e "' . $item['capcode'] . ':' . $replaced_input . '" | sudo ./pocsag -f "' . $item['frequency'] . '" -b 3 -r "' . $item['baud'] . '" -t 3 -i';
+} else {
+    $command = 'sudo echo -e "' . $item['capcode'] . ':' . $replaced_input . '" | sudo ./pocsag -f "' . $item['frequency'] . '" -b 3 -r "' . $item['baud'] . '" -t 3';
+}
         $output = shell_exec($command);
         if ($output !== null) {
             $currentID = logCommand($commandLogCounter, $output, [
                 'message' => $field1,
                 'capcode' => $item['capcode'],
-                'frequency' => $item['freq'],
+                'frequency' => $item['frequency'],
                 'baud' => $item['baud'],
                 'inversion' => $item['inversion']
             ]);
             $commandLogCounter++;
       //echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
-        runLogToUsb();
+	runLogToUsb();
+	setLastMessage($messageToSend);
         }
     }
 }
 
 // Handle manual page sending
 if (isset($_POST["button2"])) {
-    // Selection options
-    $selections = [
-        'selection1' => ['0364594', '147650000', '512', 'off'],
-        'selection2' => ['0364592', '157499990', '512', 'off'],
-        'selection3' => ['1277794', '161437500', '512', 'off'],
-        'selection4' => ['0644743', '148625000', '512', 'off'],
-        'selection5' => ['0625253', '148625000', '512', 'off'],
-        'selection6' => ['0627015', '148625000', '512', 'off'],
-        'selection7' => ['0642575', '148625000', '512', 'off']
-    ];
 
-    $selectedOption = $_POST['dropdown'] ?? '';
-    list($var1, $var2, $var3, $var4) = ['', '', '', ''];
-
-    // Handle selection
-    if (array_key_exists($selectedOption, $selections)) {
-        list($var1, $var2, $var3, $var4) = $selections[$selectedOption];
-    } elseif ($selectedOption === 'freetext') {
-        $var1 = $_POST['freetext1'] ?? '';
-        $var2 = $_POST['freetext2'] ?? '';
-        $var3 = $_POST['freetext3'] ?? '';
-        $var4 = isset($_POST['freetext4']) ? $_POST['freetext4'] : 'off';
+    if (!canPressButton()) {
+        echo "<script>
+            alert('Please wait at least 60 seconds before pressing this button again.');
+            window.location.href = '" . $_SERVER['PHP_SELF'] . "';
+        </script>";
+        exit();
     }
+$messageToSend = $field1; // or assemble message parts as needed
+
+    if (isDuplicateMessage($messageToSend, ['enableMessageDuplicateRestriction' => $enableMsgDupRestriction])) {
+        echo "<script>
+            alert('Duplicate message detected. Please change the message or wait before sending the same message again.');
+            window.location.href = '" . $_SERVER['PHP_SELF'] . "';
+        </script>";
+        exit();
+    }
+
+$selectedOption = $_POST['dropdown'] ?? '';
+
+$selections = $dropdownOptions; // from above
+
+if (array_key_exists($selectedOption, $selections)) {
+    $var1 = $selections[$selectedOption]['capcode'];
+    $var2 = $selections[$selectedOption]['frequency'];
+    $var3 = $selections[$selectedOption]['baud'];
+    $var4 = $selections[$selectedOption]['inversion'];
+} elseif ($selectedOption === 'freetext') {
+    $var1 = $_POST['freetext1'] ?? '';
+    $var2 = $_POST['freetext2'] ?? '';
+    $var3 = $_POST['freetext3'] ?? '';
+    $var4 = isset($_POST['freetext4']) ? $_POST['freetext4'] : 'off';
+}
 
     $field1 = $_POST["stext"] ?? '';
 
@@ -265,8 +377,9 @@ if (isset($_POST["button2"])) {
             'inversion' => $var4
         ]);
         $commandLogCounter++;
-        //echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
-        runLogToUsb();
+	//echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
+	runLogToUsb();
+	setLastMessage($messageToSend);
     }
 
     // Prepare display info
@@ -297,17 +410,15 @@ if (isset($_POST["button2"])) {
 <body>
 <center>
 <form method="post" action="" onsubmit="showLoading()">
-    <select name="dropdown" id="dropdown" onchange="toggleFreetextInputs()" style="font-size:24px">
-        <option value="selection1">Pager1 0364594</option>
-        <option value="selection2">Pager2 0364592</option>
-        <option value="selection3">Pager3 1277794</option>
-        <option value="selection4">Pager4 0644743</option>
-        <option value="selection5">Pager5 0625253</option>
-        <option value="selection6">Pager6 0627015</option>
-        <option value="selection7">Pager7 0642575</option>
-        <option value="freetext">Manual Page</option>
-    </select>
-
+<select name="dropdown" id="dropdown" onchange="toggleFreetextInputs()" style="font-size:24px">
+    <?php
+    foreach ($dropdownOptions as $key => $option) {
+        // Use the key as value, and display custom text
+        echo "<option value=\"$key\">Pager: {$option['capcode']}</option>";
+    }
+    ?>
+    <option value="freetext">Manual Page</option>
+</select>
     <div id="freetextInputs" style="display: none;">
         <br>
         <input type="text" name="freetext1" placeholder="Capcode" style="font-size:24px"><br>
@@ -355,16 +466,16 @@ function toggleFreetextInputs() {
 </html>
 <!-- Loading spinner -->
 <div id="loading" style="
-    display:none;
-    position:fixed;
-    top:50%;
-    left:50%;
+    display:none; 
+    position:fixed; 
+    top:50%; 
+    left:50%; 
     transform:translate(-50%, -50%);
-    padding: 20px;
-    background-color: rgba(0,0,0,0.8);
-    color: #fff;
-    font-size: 24px;
-    border-radius: 10px;
+    padding: 20px; 
+    background-color: rgba(0,0,0,0.8); 
+    color: #fff; 
+    font-size: 24px; 
+    border-radius: 10px; 
     z-index: 9999;">
     Processing...
 </div>

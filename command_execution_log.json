@@ -1,0 +1,13 @@
+[
+    {
+        "id": 1,
+        "timestamp": "2025-07-31 22:10:51",
+        "details": {
+            "message": "hej",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    }
+]

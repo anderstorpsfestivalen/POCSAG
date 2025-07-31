@@ -1,3 +1,5 @@
 {
-    "enableSubnetRestriction": false
+    "enableSubnetRestriction": false,
+    "enableRateLimit": false,
+    "enableMessageDuplicateRestriction": false
 }

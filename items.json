@@ -1,53 +1,53 @@
 {
-  "items": [
-    {
-      "id": 1,
-      "capcode": "0364594",
-      "frequency": "147650000",
-      "baud": "512",
-      "inversion": "off"
-    },
-    {
-      "id": 2,
-      "capcode": "0364592",
-      "frequency": "157499990",
-      "baud": "512",
-      "inversion": "off"
-    },
-    {
-      "id": 3,
-      "capcode": "1277794",
-      "frequency": "161437500",
-      "baud": "512",
-      "inversion": "off"
-    },
-    {
-      "id": 4,
-      "capcode": "0644743",
-      "frequency": "148625000",
-      "baud": "512",
-      "inversion": "off"
-    },
-    {
-      "id": 5,
-      "capcode": "0625253",
-      "frequency": "148625000",
-      "baud": "512",
-      "inversion": "off"
-    },
-    {
-      "id": 6,
-      "capcode": "0627015",
-      "frequency": "148625000",
-      "baud": "512",
-      "inversion": "off"
-    },
-    {
-      "id": 7,
-      "capcode": "0642575",
-      "frequency": "148625000",
-      "baud": "512",
-      "inversion": "off"
-    }
-  ]
+    "items": [
+        {
+            "id": 1,
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        },
+        {
+            "id": 2,
+            "capcode": "0364592",
+            "frequency": "157499990",
+            "baud": "512",
+            "inversion": "off"
+        },
+        {
+            "id": 3,
+            "capcode": "1277794",
+            "frequency": "161437500",
+            "baud": "512",
+            "inversion": "off"
+        },
+        {
+            "id": 4,
+            "capcode": "0644743",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        },
+        {
+            "id": 5,
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        },
+        {
+            "id": 6,
+            "capcode": "0627015",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        },
+        {
+            "id": 7,
+            "capcode": "0642575",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    ]
 }
