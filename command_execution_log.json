@@ -1,11 +1,156 @@
 [
     {
         "id": 1,
-        "timestamp": "2025-07-31 22:10:51",
+        "timestamp": "2025-08-01 16:10:05",
+        "details": {
+            "message": "Print Beer Purchase Receipt",
+            "action": "print_receipt"
+        }
+    },
+    {
+        "id": 2,
+        "timestamp": "2025-08-01 16:10:13",
+        "details": {
+            "message": "Print Beer Purchase Receipt",
+            "action": "print_receipt"
+        }
+    },
+    {
+        "id": 3,
+        "timestamp": "2025-08-01 16:11:00",
         "details": {
             "message": "hej",
             "capcode": "0364594",
             "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 4,
+        "timestamp": "2025-08-01 17:50:17",
+        "details": {
+            "message": "Print Beer Purchase Receipt",
+            "action": "print_receipt"
+        }
+    },
+    {
+        "id": 5,
+        "timestamp": "2025-08-01 17:50:27",
+        "details": {
+            "message": "",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 6,
+        "timestamp": "2025-08-01 18:10:20",
+        "details": {
+            "message": "",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 7,
+        "timestamp": "2025-08-01 18:10:31",
+        "details": {
+            "message": "",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 8,
+        "timestamp": "2025-08-01 18:20:29",
+        "details": {
+            "message": "",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 9,
+        "timestamp": "2025-08-01 18:20:42",
+        "details": {
+            "message": "",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 10,
+        "timestamp": "2025-08-01 18:20:46",
+        "details": {
+            "message": "",
+            "capcode": "0364592",
+            "frequency": "157499990",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 11,
+        "timestamp": "2025-08-01 18:20:51",
+        "details": {
+            "message": "",
+            "capcode": "1277794",
+            "frequency": "161437500",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 12,
+        "timestamp": "2025-08-01 18:20:59",
+        "details": {
+            "message": "",
+            "capcode": "0644743",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 13,
+        "timestamp": "2025-08-01 18:21:03",
+        "details": {
+            "message": "",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 14,
+        "timestamp": "2025-08-01 18:21:11",
+        "details": {
+            "message": "",
+            "capcode": "0627015",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off"
+        }
+    },
+    {
+        "id": 15,
+        "timestamp": "2025-08-01 18:21:18",
+        "details": {
+            "message": "",
+            "capcode": "0642575",
+            "frequency": "148625000",
             "baud": "512",
             "inversion": "off"
         }

@@ -201,7 +201,10 @@ if (!is_writable($devicePath)) {
     // Send the JSON content to the USB device
     $command = "sudo sh -c 'cat " . escapeshellarg($tmpPrintFile) . " > " . escapeshellarg($devicePath) . "'";
     shell_exec($command);
-
+$escapeSequence = "\x1B\x64\x01";
+$escapedSequence = escapeshellarg($escapeSequence);
+$cmd = "echo  $escapedSequence | sudo tee /dev/usb/lp0 > /dev/null";
+shell_exec($cmd);
     return true;
 }
 
@@ -252,13 +255,6 @@ if (isset($_POST['print_receipt'])) {
         exit();
     }
 
-    // Log the print receipt action into command log
-    // You can log a generic message or details relevant to printing
-    logCommand($commandLogCounter, null, [
-        'message' => 'Print Beer Purchase Receipt',
-        'action' => 'print_receipt'
-    ]);
-    $commandLogCounter++;
 
     // Proceed with the printing logic
     $filePath = '/var/www/dashboard/ascii';
@@ -282,7 +278,10 @@ if (isset($_POST['print_receipt'])) {
     } else {
         echo "Print job sent successfully.";
         logPrintBeerReceipt();
-    }
+	// Run the command after printing
+        $cmd = 'sudo printf "\x1B\x64\x01" | sudo tee /dev/usb/lp0 > /dev/null';
+        shell_exec($cmd);    
+}
 }
 
 
