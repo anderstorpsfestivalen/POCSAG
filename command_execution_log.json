@@ -1,130 +1,31 @@
 [
     {
         "id": 1,
-        "timestamp": "2025-08-01 16:10:05",
+        "timestamp": "2025-08-02 16:32:37",
         "details": {
-            "message": "Print Beer Purchase Receipt",
-            "action": "print_receipt"
+            "message": "",
+            "capcode": "0364594",
+            "frequency": "147650000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Secondary Pager for South Wing"
         }
     },
     {
         "id": 2,
-        "timestamp": "2025-08-01 16:10:13",
+        "timestamp": "2025-08-02 17:37:12",
         "details": {
-            "message": "Print Beer Purchase Receipt",
-            "action": "print_receipt"
+            "message": "hej",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Secondary Pager for South Wing"
         }
     },
     {
         "id": 3,
-        "timestamp": "2025-08-01 16:11:00",
-        "details": {
-            "message": "hej",
-            "capcode": "0364594",
-            "frequency": "147650000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 4,
-        "timestamp": "2025-08-01 17:50:17",
-        "details": {
-            "message": "Print Beer Purchase Receipt",
-            "action": "print_receipt"
-        }
-    },
-    {
-        "id": 5,
-        "timestamp": "2025-08-01 17:50:27",
-        "details": {
-            "message": "",
-            "capcode": "0364594",
-            "frequency": "147650000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 6,
-        "timestamp": "2025-08-01 18:10:20",
-        "details": {
-            "message": "",
-            "capcode": "0364594",
-            "frequency": "147650000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 7,
-        "timestamp": "2025-08-01 18:10:31",
-        "details": {
-            "message": "",
-            "capcode": "0364594",
-            "frequency": "147650000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 8,
-        "timestamp": "2025-08-01 18:20:29",
-        "details": {
-            "message": "",
-            "capcode": "0364594",
-            "frequency": "147650000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 9,
-        "timestamp": "2025-08-01 18:20:42",
-        "details": {
-            "message": "",
-            "capcode": "0364594",
-            "frequency": "147650000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 10,
-        "timestamp": "2025-08-01 18:20:46",
-        "details": {
-            "message": "",
-            "capcode": "0364592",
-            "frequency": "157499990",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 11,
-        "timestamp": "2025-08-01 18:20:51",
-        "details": {
-            "message": "",
-            "capcode": "1277794",
-            "frequency": "161437500",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 12,
-        "timestamp": "2025-08-01 18:20:59",
-        "details": {
-            "message": "",
-            "capcode": "0644743",
-            "frequency": "148625000",
-            "baud": "512",
-            "inversion": "off"
-        }
-    },
-    {
-        "id": 13,
-        "timestamp": "2025-08-01 18:21:03",
+        "timestamp": "2025-08-02 17:39:56",
         "details": {
             "message": "",
             "capcode": "0625253",
@@ -134,25 +35,97 @@
         }
     },
     {
-        "id": 14,
-        "timestamp": "2025-08-01 18:21:11",
+        "id": 4,
+        "timestamp": "2025-08-02 17:40:54",
         "details": {
             "message": "",
-            "capcode": "0627015",
+            "capcode": "0625253",
             "frequency": "148625000",
             "baud": "512",
             "inversion": "off"
         }
     },
     {
-        "id": 15,
-        "timestamp": "2025-08-01 18:21:18",
+        "id": 5,
+        "timestamp": "2025-08-02 17:41:01",
         "details": {
             "message": "",
-            "capcode": "0642575",
+            "capcode": "0644743",
             "frequency": "148625000",
             "baud": "512",
             "inversion": "off"
+        }
+    },
+    {
+        "id": 6,
+        "timestamp": "2025-08-02 17:44:21",
+        "details": {
+            "message": "",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Secondary Pager for South Wing"
+        }
+    },
+    {
+        "id": 7,
+        "timestamp": "2025-08-02 18:34:19",
+        "details": {
+            "message": "hej",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Pager5"
+        }
+    },
+    {
+        "id": 8,
+        "timestamp": "2025-08-02 18:34:28",
+        "details": {
+            "message": "hej",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Pager5"
+        }
+    },
+    {
+        "id": 9,
+        "timestamp": "2025-08-02 18:35:08",
+        "details": {
+            "message": "",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Pager5"
+        }
+    },
+    {
+        "id": 10,
+        "timestamp": "2025-08-02 19:03:56",
+        "details": {
+            "message": "",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Pager5"
+        }
+    },
+    {
+        "id": 11,
+        "timestamp": "2025-08-02 19:04:10",
+        "details": {
+            "message": "",
+            "capcode": "0625253",
+            "frequency": "148625000",
+            "baud": "512",
+            "inversion": "off",
+            "description": "Pager5"
         }
     }
 ]

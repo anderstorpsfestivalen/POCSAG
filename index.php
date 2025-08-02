@@ -68,12 +68,15 @@ $dropdownOptions = [];
 if (file_exists($dropdownFile)) {
     $jsonContent = file_get_contents($dropdownFile);
     $data = json_decode($jsonContent, true);
-    if (isset($data['selections']) && is_array($data['selections'])) {
-        $dropdownOptions = $data['selections'];
+    if (isset($data['items']) && is_array($data['items'])) {
+        $dropdownOptions = $data['items'];
     }
 }
 
-
+$dropdownOptionsMap = [];
+foreach ($dropdownOptions as $option) {
+    $dropdownOptionsMap[$option['id']] = $option;
+}
 // Function to log commands into a JSON file with incremental IDs
 function logCommand($commandLogCounter, $commandOutput, $details) {
     $logFile = 'command_execution_log.json';
@@ -181,7 +184,8 @@ if (!is_writable($devicePath)) {
             "capcode" => $entry['details']['capcode'],
             "frequency" => $entry['details']['frequency'],
             "baud" => $entry['details']['baud'],
-            "inversion" => $entry['details']['inversion']
+            "inversion" => $entry['details']['inversion'],
+            "description" => $entry['details']['description']
         ]
     ];
 
@@ -201,9 +205,11 @@ if (!is_writable($devicePath)) {
     // Send the JSON content to the USB device
     $command = "sudo sh -c 'cat " . escapeshellarg($tmpPrintFile) . " > " . escapeshellarg($devicePath) . "'";
     shell_exec($command);
-$escapeSequence = "\x1B\x64\x01";
-$escapedSequence = escapeshellarg($escapeSequence);
-$cmd = "echo  $escapedSequence | sudo tee /dev/usb/lp0 > /dev/null";
+//$escapeSequence = "\x1B\x64\x01";
+//$escapedSequence = escapeshellarg($escapeSequence);
+//$cmd = "echo  $escapedSequence | sudo tee /dev/usb/lp0 > /dev/null";
+//shell_exec($cmd);
+$cmd = 'sudo printf "\x1B\x64\x01" | sudo tee /dev/usb/lp0 > /dev/null';
 shell_exec($cmd);
     return true;
 }
@@ -327,7 +333,8 @@ if ($item['inversion'] == 'on') {
                 'capcode' => $item['capcode'],
                 'frequency' => $item['frequency'],
                 'baud' => $item['baud'],
-                'inversion' => $item['inversion']
+                'inversion' => $item['inversion'],
+                'description' => $item['description']
             ]);
             $commandLogCounter++;
       //echo "ID: $currentID Capcode: {$item['capcode']}, Freq: {$item['freq']}, Baud: {$item['baud']}, Inversion: {$item['inversion']} Message: $field1";
@@ -359,13 +366,13 @@ $messageToSend = $field1; // or assemble message parts as needed
 
 $selectedOption = $_POST['dropdown'] ?? '';
 
-$selections = $dropdownOptions; // from above
-
-if (array_key_exists($selectedOption, $selections)) {
-    $var1 = $selections[$selectedOption]['capcode'];
-    $var2 = $selections[$selectedOption]['frequency'];
-    $var3 = $selections[$selectedOption]['baud'];
-    $var4 = $selections[$selectedOption]['inversion'];
+if (isset($dropdownOptionsMap[$selectedOption])) {
+    $opt = $dropdownOptionsMap[$selectedOption];
+    $var1 = $opt['capcode'];
+    $var2 = $opt['frequency'];
+    $var3 = $opt['baud'];
+    $var4 = $opt['inversion'];
+    $var5 = $opt['description'];
 } elseif ($selectedOption === 'freetext') {
     $var1 = $_POST['freetext1'] ?? '';
     $var2 = $_POST['freetext2'] ?? '';
@@ -417,7 +424,8 @@ if (array_key_exists($selectedOption, $selections)) {
             'capcode' => $var1,
             'frequency' => $var2,
             'baud' => $var3,
-            'inversion' => $var4
+            'inversion' => $var4,
+	    'description' => $var5
         ]);
         $commandLogCounter++;
 	//echo "ID: $currentID Capcode: $var1, Freq: $var2, Baud: $var3, Inversion: $var4 Message: $field1";
@@ -426,15 +434,36 @@ if (array_key_exists($selectedOption, $selections)) {
     }
 
     // Prepare display info
-    $array2[] = "<div style='margin: 50px; font-family: Arial, sans-serif; text-align: center;'>
-        <table style='width: 100%; border-collapse: collapse; margin: auto;'>
-            <tr><td style='padding: 5px; text-align: right;'><strong>Message:</strong></td><td style='padding: 5px; text-align: left;'>$field1</td></tr>
-            <tr><td style='padding: 5px; text-align: right;'><strong>Capcode:</strong></td><td style='padding: 5px; text-align: left;'>$var1</td></tr>
-            <tr><td style='padding: 5px; text-align: right;'><strong>Frequency:</strong></td><td style='padding: 5px; text-align: left;'>$var2</td></tr>
-            <tr><td style='padding: 5px; text-align: right;'><strong>Baud:</strong></td><td style='padding: 5px; text-align: left;'>$var3</td></tr>
-            <tr><td style='padding: 5px; text-align: right;'><strong>Inversion:</strong></td><td style='padding: 5px; text-align: left;'>$var4</td></tr>
+$array2[] = "<div style='display: flex; justify-content: center; margin: 50px 0; font-family: Arial, sans-serif;'>
+    <div style='max-width: 600px; width: 100%; background-color: #f9f9f9; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px;'>
+        <table style='width: 100%; border-collapse: collapse;'>
+            <tr>
+                <td style='padding: 8px; font-weight: bold; width: 150px; text-align: right;'>Message:</td>
+                <td style='padding: 8px; text-align: left;'>$field1</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; font-weight: bold; text-align: right;'>Capcode:</td>
+                <td style='padding: 8px; text-align: left;'>$var1</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; font-weight: bold; text-align: right;'>Frequency:</td>
+                <td style='padding: 8px; text-align: left;'>$var2</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; font-weight: bold; text-align: right;'>Baud:</td>
+                <td style='padding: 8px; text-align: left;'>$var3</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; font-weight: bold; text-align: right;'>Inversion:</td>
+                <td style='padding: 8px; text-align: left;'>$var4</td>
+            </tr>
+            <tr>
+                <td style='padding: 8px; font-weight: bold; text-align: right;'>Description:</td>
+                <td style='padding: 8px; text-align: left;'>$var5</td>
+            </tr>
         </table>
-    </div>";
+    </div>
+</div>";
 }
 ?>
 
@@ -454,13 +483,14 @@ if (array_key_exists($selectedOption, $selections)) {
 <center>
 <form method="post" action="" onsubmit="showLoading()">
 <select name="dropdown" id="dropdown" onchange="toggleFreetextInputs()" style="font-size:24px">
-    <?php
-    foreach ($dropdownOptions as $key => $option) {
-        // Use the key as value, and display custom text
-        echo "<option value=\"$key\">Pager: {$option['capcode']}</option>";
-    }
-    ?>
-    <option value="freetext">Manual Page</option>
+<?php
+foreach ($dropdownOptions as $option) {
+    $key = $option['id'];
+    $description = isset($option['description']) ? $option['description'] : '';
+    echo "<option value=\"$key\">{$option['capcode']} - {$description}</option>";
+}
+?>
+<option value="freetext">Manual Page</option>
 </select>
     <div id="freetextInputs" style="display: none;">
         <br>

@@ -55,6 +55,7 @@ process_command_log() {
             frequency=$(echo "$entry" | jq -r '.details.frequency')
             baud=$(echo "$entry" | jq -r '.details.baud')
             inversion=$(echo "$entry" | jq -r '.details.inversion')
+            description=$(echo "$entry" | jq -r '.details.description')
 
             json_output=$(jq -n --arg id "$id" \
                                 --arg timestamp "$timestamp" \
@@ -63,6 +64,7 @@ process_command_log() {
                                 --arg frequency "$frequency" \
                                 --arg baud "$baud" \
                                 --arg inversion "$inversion" \
+                                --arg description "$description" \
                         '{
                             id: ($id | tonumber),
                             timestamp: $timestamp,
@@ -71,7 +73,8 @@ process_command_log() {
                                 capcode: $capcode,
                                 frequency: $frequency,
                                 baud: $baud,
-                                inversion: $inversion
+                                inversion: $inversion,
+                                description: $description
                             }
                         }')
             send_to_printer "$json_output"
@@ -105,6 +108,7 @@ process_command_log() {
                     frequency=$(echo "$last_entry" | jq -r '.details.frequency')
                     baud=$(echo "$last_entry" | jq -r '.details.baud')
                     inversion=$(echo "$last_entry" | jq -r '.details.inversion')
+                    description=$(echo "$last_entry" | jq -r '.details.description')
 
                     json_output=$(jq -n --arg id "$id" \
                                         --arg timestamp "$timestamp" \
@@ -113,6 +117,7 @@ process_command_log() {
                                         --arg frequency "$frequency" \
                                         --arg baud "$baud" \
                                         --arg inversion "$inversion" \
+                                        --arg description "$description" \
                                 '{
                                     id: ($id | tonumber),
                                     timestamp: $timestamp,
@@ -121,7 +126,8 @@ process_command_log() {
                                         capcode: $capcode,
                                         frequency: $frequency,
                                         baud: $baud,
-                                        inversion: $inversion
+                                        inversion: $inversion,
+                                        description: $description
                                     }
                                 }')
                     send_to_printer "$json_output"
